@@ -1,0 +1,14 @@
+<RCC>
+    <qresource prefix="/aaa">
+        <file>icons/plus.png</file>
+        <file>icons/user.png</file>
+        <file>icons/exit.png</file>
+        <file>icons/delete.png</file>
+    </qresource>
+    <qresource prefix="/">
+        <file>icons/play.png</file>
+        <file>upravit_main.qml</file>
+        <file>main.qml</file>
+        <file>cviky_storage.js</file>
+    </qresource>
+</RCC>
