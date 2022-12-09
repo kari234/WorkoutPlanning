@@ -57,6 +57,7 @@ var a = [
 
 // array na predavani JMENA cviku ktery se ma prehrat
 // Adam:
+// nazev toho cviku tam bude pushutej kdyz to dostanes kdyztak si tam zatim muzes napsat treba "Ukazka 1" a zkouset to
 // 1. ziskat do promene v qml pomoci ALIAS.play.pop()
 // 2. projit array a nahrat si k sobe cviky a casy
 var play = []
