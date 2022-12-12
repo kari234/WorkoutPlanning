@@ -21,15 +21,19 @@ Window {
     height: 844
     visible: true
     title: qsTr("WorkoutPlanning")
+    property int total_t: 0
+    property int tmp: -1
+    property bool ok_input: true
+    property string shared_Wo: ""
 
     Component.onCompleted: {
         // Load the list into the screen
         for (var i = 0; i < Data.a.length; i+=1 ) {
             if (i == 0) {
-                id_leftLocation.append({"name": Data.a[0], "trvani": Data.a[1]})
+                id_cviky.append({"name": Data.a[0], "trvani": Data.a[1]})
             }
             if (Data.a[i] == "konec_s3r13" && i+2 != Data.a.length && i != 0) {
-                id_leftLocation.append({"name": Data.a[i+1], "trvani": Data.a[i+2]})
+                id_cviky.append({"name": Data.a[i+1], "trvani": Data.a[i+2]})
                 i+=2;
             }
         }
@@ -47,6 +51,146 @@ Window {
         gradient: Gradient {
             GradientStop {position: 0.100;color: "#6F44A6";}
             GradientStop {position: 0.900;color: Qt.rgba(120, 105, 151, 1);}
+        }
+        Rectangle {
+            id: share_form
+            x: 15
+            y: 50
+            z: 100
+            opacity: 100
+            visible: false
+            width: 360
+            height: 300
+            radius: 14
+            color: "#555555"
+            Image {
+                id: exit_share
+                width: 54
+                height: 54
+                anchors.right: parent.right
+                anchors.top: parent.top
+                source: "qrc:/aaa/icons/exit.png"
+                anchors.rightMargin: 13
+                anchors.topMargin: 13
+            }
+            MouseArea {
+                id: mouseAreaExitShare
+                width: 54
+                height: 54
+                anchors.right: parent.right
+                anchors.top: parent.top
+                anchors.rightMargin: 13
+                anchors.topMargin: 13
+                onClicked: {
+                    share_blurry.visible= false
+                    share_form.visible= false
+                    in_email.text= ""
+                    invalidEm.visible= false
+                }
+            }
+            Text {
+                id: name_shared
+                x: 30
+                y: 15
+                text: homescreen.shared_Wo
+                font.pixelSize: 38
+                font.bold: true
+            }
+            Text {
+                id: text_email
+                x: 30
+                y: 70
+                text: qsTr("Sdílet s (email):")
+                font.pixelSize: 30
+            }
+
+            Rectangle {
+                id: inputEmailRec
+                x: 30
+                y: 140
+                width: 300
+                height: 40
+                color: "#ffffff"
+                radius: 6
+
+                TextInput {
+                    id: in_email
+                    x: 8
+                    y: 0
+                    width: 290
+                    height: 40
+                    text: ""
+                    font.pixelSize: 30
+                    onEditingFinished: {
+                        if(in_email.text == "") {
+                            invalidEm.visible= true
+                        }
+                        else {
+                            invalidEm.visible= false
+                        }
+                    }
+                    Text {
+                        id: invalidEm
+                        x: 210
+                        y: 50
+                        visible: false
+                        text: "* povinné"
+                        color: "red"
+                        font.pixelSize: 14
+                    }
+                }
+            }
+            Button {
+                id: share_b
+                width: 150
+                x: 105
+                height: 63
+                text: qsTr("Sdílet")
+                anchors.bottom: parent.bottom
+                anchors.bottomMargin: 15
+                icon.source: ""
+                autoRepeat: false
+                font.family: "Arial"
+                icon.width: 25
+                icon.color: "#7EA778"
+                font.pointSize: 36
+                onClicked: {
+                    if(in_email.text == "") {
+                        invalidEm.visible= true
+                    }
+                    else {
+                        /*
+                        *****************************
+                        **********  PEPA ************
+                         - homescreen.shared_Wo
+                         - v tom je nahranej název toho cviku kterej se má sdílet
+
+                         - in_email.text
+                         - v tom je nahraný email člověka s kterým to chce sdílet
+
+                         ***************************
+                         - sem si napiš ten kód aby se to pushnulo k těm sdíleným
+                         - musíš to napsat do tohodle else{} nad to share_form.visible... jinak to nebude fungovat
+                        */
+                        share_form.visible= false
+                        share_blurry.visible= false
+                        invalidEm.visible= false
+                        in_email.text= ""
+                    }
+                }
+            }
+        }
+        Rectangle {
+            id: share_blurry
+            width: 390
+            height: 844
+            visible: false
+            opacity: 0.68
+            x: 0
+            y: 0
+            z: 20
+            anchors.leftMargin: 0
+            anchors.topMargin: 0
         }
 
         Rectangle {
@@ -85,7 +229,11 @@ Window {
                 y: 0
                 width: 78
                 height: 65
-                onClicked: add_modal.show_modal1= true;
+                onClicked: {
+                    add_modal.show_modal1= true
+                    id_container2.visible= true
+                    id_cviky2.append({"edit_cvik": "", "edit_t": "", "edit_p": "", "edit_s": "", "test_i1": false, "test_i2": false, "test_i3": false, "test_i4": false})
+                }
             }
         }
 
@@ -93,13 +241,13 @@ Window {
          // create workout list
             // List of location in center
             ListModel {
-                id: id_leftLocation
+                id: id_cviky
             }
 
 
             // Display workouts
             Component {
-                id: id_leftDelegate
+                id: id_delegate
 
                 Item {
                     height: 150
@@ -195,8 +343,23 @@ Window {
                                 visible: false
                                 rotation: 172.275
                             }
-                            onClicked: test.visible= true;
+                            onClicked: {
+                                info_modal.visible= true
+                                nazev_info.text= textEdit.text
+                                for (var i = 0; i < Data.a.length; i+=1) {
+                                    if(Data.a[i] == textEdit.text) {
+                                        min_info.text = Data.a[i+1] + " minut"
+                                        i+=2
+                                        while(Data.a[i] != "konec_s3r13") {
+                                            cv_info.text += Data.a[i] + "<br>"
+                                            i+=4
+                                        }
+                                        break
+                                    }
+                                }
+                            }
                         }
+                        Loader {id: pagePlay}
 
                         MouseArea {
                             id: mouseArea1
@@ -216,8 +379,11 @@ Window {
                             }
                             onClicked: {
                                 Data.play.push(textEdit.text)
-                                test2.visible= true;
-                                console.log("Remaining elements: " + Data.play);
+                                /*
+                                    ******************
+                                    ADAM onClicked: pagePlay.source= "URL na tvoji stranku"
+                                    ******************
+                                */
                             }
                         }
 
@@ -242,8 +408,8 @@ Window {
                     anchors.fill: parent
                     Column {
                         Repeater {
-                            model: id_leftLocation
-                            delegate: id_leftDelegate
+                            model: id_cviky
+                            delegate: id_delegate
                         }
                     }
                 }
@@ -253,6 +419,151 @@ Window {
 
 
 
+        // show info about workout
+            Rectangle {
+                id: info_modal
+                visible: false
+                x: 8
+                y: 30
+                width: 374
+                height: 647
+                color: "#555555"
+                radius: 20
+                Image {
+                    id: exit_info
+                    x: 297
+                    width: 64
+                    height: 64
+                    anchors.right: parent.right
+                    anchors.top: parent.top
+                    source: "qrc:/aaa/icons/exit.png"
+                    anchors.rightMargin: 13
+                    anchors.topMargin: 13
+                }
+                MouseArea {
+                    id: mouseAreaExitInfo
+                    x: 297
+                    width: 64
+                    height: 64
+                    anchors.right: parent.right
+                    anchors.top: parent.top
+                    anchors.rightMargin: 13
+                    anchors.topMargin: 13
+                    onClicked: {
+                        info_modal.visible= false
+                        cv_info.text= ""
+                    }
+                }
+
+                Button {
+                    id: button_info
+                    x: 111
+                    y: 568
+                    width: 152
+                    height: 63
+                    text: qsTr("Hotovo")
+                    icon.source: ""
+                    autoRepeat: false
+                    font.family: "Arial"
+                    icon.width: 25
+                    icon.color: "#7EA778"
+                    font.pointSize: 36
+                    onClicked: {
+                        info_modal.visible= false
+                        cv_info.text= ""
+                    }
+                }
+
+
+                Rectangle {
+                    id: rectangle_infoshow
+                    x: 8
+                    y: 90
+                    width: 358
+                    height: 456
+                    color: "white"
+                    Text {
+                        id: nazev_info
+                        x: 30
+                        y: 15
+                        text: ""
+                        font.pixelSize: 38
+                        font.bold: true
+                    }
+                    Text {
+                        id: cv_info
+                        x: 30
+                        y: 55
+                        text: ""
+                        font.pixelSize: 30
+                    }
+                    Text {
+                        id: safrovani
+                        x: 30
+                        y: 300
+                        text: "----------------------"
+                        font.pixelSize: 30
+                    }
+                    Text {
+                        id: min_info
+                        x: 30
+                        y: 330
+                        text: ""
+                        font.pixelSize: 30
+                    }
+                    Image {
+                        id: share
+                        width: 70
+                        height: 70
+                        anchors.left: parent.left
+                        anchors.bottom: parent.bottom
+                        anchors.leftMargin: 13
+                        anchors.bottomMargin: 13
+                        source: "qrc:/aaa/icons/share_href.png"
+                    }
+                    MouseArea {
+                        id: share_link
+                        width: 70
+                        height: 70
+                        anchors.left: parent.left
+                        anchors.bottom: parent.bottom
+                        anchors.leftMargin: 13
+                        anchors.bottomMargin: 13
+                        onClicked: {
+                            homescreen.shared_Wo= nazev_info.text
+                            share_blurry.visible= true
+                            share_form.visible= true
+                        }
+                    }
+                    Image {
+                        id: edit_href
+                        width: 70
+                        height: 70
+                        anchors.right: parent.right
+                        anchors.bottom: parent.bottom
+                        anchors.rightMargin: 13
+                        anchors.bottomMargin: 13
+                        source: "qrc:/aaa/icons/edit_href.png"
+                    }
+                    Loader{id: edit_go}
+                    MouseArea {
+                        id: edit_link
+                        width: 70
+                        height: 70
+                        anchors.right: parent.right
+                        anchors.bottom: parent.bottom
+                        anchors.rightMargin: 13
+                        anchors.bottomMargin: 13
+                        onClicked: {
+                            edit_go.source= "qrc:/upravit_main.qml"
+                        }
+                    }
+                }
+            }
+
+
+
+        // add new workout modal window
         Rectangle {
             id: add_modal
             property bool show_modal1: false
@@ -284,7 +595,14 @@ Window {
                 anchors.top: parent.top
                 anchors.rightMargin: 13
                 anchors.topMargin: 13
-                onClicked: add_modal.show_modal1= false;
+                onClicked: {
+                    add_modal.show_modal1= false
+                    id_container2.visible= false
+                    for (var j=0; j < id_cviky2.count; j+=1) {
+                        id_cviky2.remove(j)
+                        j=-1;
+                    }
+                }
             }
 
             Button {
@@ -300,20 +618,75 @@ Window {
                 icon.width: 25
                 icon.color: "#7EA778"
                 font.pointSize: 36
+                property string sum_t: ""
                 Loader {id: pageLoader3}
-                property string sum_t: (in_cvik_t.text*1+in_pauza_t.text*1)*in_serie.text*1
                 onClicked: {
+                    if(in_nazev.text == "") {
+                        homescreen.ok_input = homescreen.ok_input && false
+                        invalid1.visible= true
+                    }
+
+                    for(var u=0; u < id_cviky2.count; u+=1) {
+                        if(id_cviky2.get(u).edit_cvik == "") {
+                            id_cviky2.setProperty(u, "test_i1", true)
+                            homescreen.ok_input = homescreen.ok_input && false
+                        }
+                        if(id_cviky2.get(u).edit_t == "") {
+                            id_cviky2.setProperty(u, "test_i2", true)
+                            homescreen.ok_input = homescreen.ok_input && false
+                        }
+                        if(id_cviky2.get(u).edit_p == "") {
+                            id_cviky2.setProperty(u, "test_i3", true)
+                            homescreen.ok_input = homescreen.ok_input && false
+                        }
+                        if(id_cviky2.get(u).edit_s == "") {
+                            id_cviky2.setProperty(u, "test_i4", true)
+                            homescreen.ok_input = homescreen.ok_input && false
+                        }
+
+                    }
+                    if (homescreen.ok_input) {
                     Data.a.pop()
                     Data.a.push(in_nazev.text)
-                    Data.a.push(button_add.sum_t)
-                    Data.a.push(in_cvik.text)
-                    Data.a.push(in_cvik_t.text)
-                    Data.a.push(in_pauza_t.text)
+                    // tohle predelat jen test
+                    // TODO nesmi byt prazdny pole
+                    for (var j=0; j < id_cviky2.count; j+=1) {
+                        homescreen.total_t += (id_cviky2.get(j).edit_t*1 + id_cviky2.get(j).edit_p*1) * (id_cviky2.get(j).edit_s * 1)
+                        Data.a.push(id_cviky2.get(j).edit_cvik)
+                        Data.a.push(id_cviky2.get(j).edit_t)
+                        Data.a.push(id_cviky2.get(j).edit_p)
+                        Data.a.push(id_cviky2.get(j).edit_s)
+
+                    }
                     Data.a.push("konec_s3r13")
                     Data.a.push("k0n3c")
-                    console.log("Remaining elements: " + Data.a);
+                    button_add.sum_t= homescreen.total_t
+                    // push celkovy cas !!!
+                    // tadyyyyyy
+                    for (var i = 0; i < Data.a.length; i+=1) {
+                        if(Data.a[i] == in_nazev.text) {
+                            homescreen.tmp = i+1
+                            break
+                        }
+                    }
+                    Data.a.splice(homescreen.tmp, 0, button_add.sum_t)
+
+
+
+                    homescreen.total_t= 0
+                    homescreen.tmp = -1
                     pageLoader3.source= "qrc:/main.qml"
-                    add_modal.visible= false
+                    console.log(Data.a)
+
+                    // ok code
+                    add_modal.show_modal1= false
+                    id_container2.visible= false
+                    for (var j=0; j < id_cviky2.count; j+=1) {
+                        id_cviky2.remove(j)
+                        j=-1;
+                    }
+                    }
+                    homescreen.ok_input= true
                 }
             }
 
@@ -342,6 +715,23 @@ Window {
                     height: 40
                     text: ""
                     font.pixelSize: 30
+                    onEditingFinished: {
+                        if(in_nazev.text == "") {
+                            invalid1.visible= true
+                        }
+                        else {
+                            invalid1.visible= false
+                        }
+                    }
+                    Text {
+                        id: invalid1
+                        x: 210
+                        y: 20
+                        visible: false
+                        text: "* povinné"
+                        color: "red"
+                        font.pixelSize: 14
+                    }
                 }
             }
 
@@ -363,13 +753,50 @@ Window {
                 width: 358
                 height: 436
                 color: "#6C6C6C"
-                Item {
-                    id: item1
+
+            }
+        }
+
+
+        ListModel {
+            id: id_cviky2
+        }
+
+
+        // Display workout elements
+        Component {
+            id: id_delegate2
+
+            Item {
+                height: 360
+                width: homescreen.width * 0.9
+                // helps to filter which workout it is
+
+                Rectangle {
+                    id: rectangle2
+                    x: 25
+                    y: 300
+                    width: homescreen.width * 0.85
+                    height: 160
+                    radius: 20
+                    focus: true
+                    color: "#A1A1A1"
+                    anchors {
+                        top: parent.top
+                        topMargin: 10
+                        bottom: parent.bottom
+                        bottomMargin: 10
+                    }
+                    MouseArea {
+                            anchors.fill: parent
+                            onClicked: forceActiveFocus()
+                     }
+
                     Text {
-                        id: text2
+                        id: text2e
                         x: 19
                         y: 8
-                        color: "#c2bebe"
+                        color: "black"
                         text: qsTr("Jméno cviku")
                         font.pixelSize: 18
                     }
@@ -382,20 +809,42 @@ Window {
                         color: "#ffffff"
                         radius: 6
 
-                        TextInput {
+                        TextEdit {
                             id: in_cvik
+                            overwriteMode: true
+                            focus: true
                             x: 8
                             y: 0
                             width: 164
                             height: 40
-                            text: ""
+                            text: qsTr(edit_cvik)
+                            //onTextChanged:
                             font.pixelSize: 30
+                            onEditingFinished: {
+                                 id_cviky2.setProperty(index, "edit_cvik", in_cvik.text)
+
+                                if(in_cvik.text == "") {
+                                    id_cviky2.setProperty(index, "test_i1", true)
+                                }
+                                else {
+                                    id_cviky2.setProperty(index, "test_i1", false)
+                                }
+                            }
+                            Text {
+                                id: invalid2
+                                x: 210
+                                y: 20
+                                visible: test_i1
+                                text: "* povinné"
+                                color: "red"
+                                font.pixelSize: 14
+                            }
                         }
                     }
                     Text {
-                        id: text3
+                        id: text3e
                         x: 19
-                        color: "#c2bebe"
+                        color: "black"
                         text: qsTr("Doba trvání")
                         anchors.top: parent.top
                         font.pixelSize: 18
@@ -411,21 +860,49 @@ Window {
                         anchors.top: parent.top
                         anchors.topMargin: 119
 
-                        TextInput {
+                        TextEdit {
                             id: in_cvik_t
                             x: 8
                             width: 105
                             height: 40
-                            text: ""
+                            focus: true
+                            text: qsTr(edit_t)
                             anchors.top: parent.top
                             font.pixelSize: 30
                             anchors.topMargin: 0
+                            onEditingFinished: {
+                                 id_cviky2.setProperty(index, "edit_t", in_cvik_t.text)
+
+                                if(in_cvik_t.text == "") {
+                                    id_cviky2.setProperty(index, "test_i2", true)
+                                }
+                                else {
+                                    id_cviky2.setProperty(index, "test_i2", false)
+                                }
+                            }
+                            Text {
+                                id: invalid3
+                                x: 175
+                                y: 20
+                                visible: test_i2
+                                text: "* povinné"
+                                color: "red"
+                                font.pixelSize: 14
+                            }
+                            Text {
+                                id: min_s
+                                x: 130
+                                y: 20
+                                text: "minut"
+                                color: "black"
+                                font.pixelSize: 16
+                            }
                         }
                     }
                     Text {
                         id: text4
                         x: 19
-                        color: "#c2bebe"
+                        color: "black"
                         text: qsTr("Pauza")
                         anchors.top: parent.top
                         font.pixelSize: 18
@@ -441,21 +918,48 @@ Window {
                         anchors.top: parent.top
                         anchors.topMargin: 199
 
-                        TextInput {
+                        TextEdit {
                             id: in_pauza_t
                             x: 8
                             width: 105
                             height: 40
-                            text: ""
+                            text: edit_p
                             anchors.top: parent.top
                             font.pixelSize: 30
                             anchors.topMargin: 0
+                            onEditingFinished: {
+                                 id_cviky2.setProperty(index, "edit_p", in_pauza_t.text)
+
+                                if(in_pauza_t.text == "") {
+                                    id_cviky2.setProperty(index, "test_i3", true)
+                                }
+                                else {
+                                    id_cviky2.setProperty(index, "test_i3", false)
+                                }
+                            }
+                            Text {
+                                id: min_p
+                                x: 130
+                                y: 20
+                                text: "minut"
+                                color: "black"
+                                font.pixelSize: 16
+                            }
+                            Text {
+                                id: invalid4
+                                x: 175
+                                y: 20
+                                visible: test_i3
+                                text: "* povinné"
+                                color: "red"
+                                font.pixelSize: 14
+                            }
                         }
                     }
                     Text {
                         id: text5
                         x: 19
-                        color: "#c2bebe"
+                        color: "black"
                         text: qsTr("Počet sérií")
                         anchors.top: parent.top
                         font.pixelSize: 18
@@ -471,20 +975,108 @@ Window {
                         anchors.top: parent.top
                         anchors.topMargin: 279
 
-                        TextInput {
+                        TextEdit {
                             id: in_serie
                             x: 8
                             width: 55
                             height: 40
-                            text: ""
+                            text: edit_s
                             anchors.top: parent.top
                             font.pixelSize: 30
                             anchors.topMargin: 0
+                            onEditingFinished: {
+                                 id_cviky2.setProperty(index, "edit_s", in_serie.text)
+
+                                if(in_serie.text == "") {
+                                    id_cviky2.setProperty(index, "test_i4", true)
+                                }
+                                else {
+                                    id_cviky2.setProperty(index, "test_i4", false)
+                                }
+                            }
+                            Text {
+                                id: invalid5
+                                x: 140
+                                y: 20
+                                visible: test_i4
+                                text: "* povinné"
+                                color: "red"
+                                font.pixelSize: 14
+                            }
                         }
                     }
+                    Image {
+                        id: delete_e
+                        x: 270
+                        y: 120
+                        width: 59
+                        height: 50
+                        source: "qrc:/aaa/icons/delete_element.png"
+                        fillMode: Image.PreserveAspectFit
+                    }
+                    MouseArea {
+                     id: delete_element
+                     x: 270
+                     y: 120
+                     width: 59
+                     height: 50
+                     onClicked: {
+                         console.log("Remaining elements: " + Data.a);
+                         id_cviky2.remove(index)
+                     }
+
+                    }
+
+
+                 }
+             }
+
+         }
+
+        // Container to store list
+        Flickable {
+            id: id_container2
+            visible: false
+            anchors {
+                left: homescreen.left
+                top: top_area.bottom
+                right: homescreen.right
+                bottom: lowerBar.top
+            }
+            ScrollView {
+                width: 375
+                height: 436
+                y: 83
+            // 1 column in 1 row
+            Row {
+                anchors.fill: parent
+                Column {
+                    Repeater {
+                        model: id_cviky2
+                        delegate: id_delegate2
+                    }
+                     Image {
+                         id: add_elem
+                         width: 180
+                         height: 50
+                         x: 30
+                         source: "qrc:/aaa/icons/add_element.png"
+                         MouseArea {
+                             width: 180
+                             height: 50
+                             onClicked: {
+                                 console.log("klik")
+                                 id_cviky2.append({"edit_cvik": "", "edit_t": "", "edit_p": "", "edit_s": "", "test_i1": false, "test_i2": false, "test_i3": false, "test_i4": false})
+                             }
+                         }
+                     }
                 }
             }
+
+            ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+            }
         }
+
 
         Rectangle {
             id: lowerBar

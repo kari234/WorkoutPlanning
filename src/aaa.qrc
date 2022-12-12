@@ -4,6 +4,10 @@
         <file>icons/user.png</file>
         <file>icons/exit.png</file>
         <file>icons/delete.png</file>
+        <file>icons/delete_element.png</file>
+        <file>icons/add_element.png</file>
+        <file>icons/edit_href.png</file>
+        <file>icons/share_href.png</file>
     </qresource>
     <qresource prefix="/">
         <file>icons/play.png</file>

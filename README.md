@@ -15,3 +15,5 @@ Pepa: taky se na ten .js file kdyztak podivej
   kdyz se to znova otevre ta apka a ten js.lenght() > 0 tak ho to rovnou hodi na main.qml
   zobrazit to na profilu a u zmeny nejakyho udaje to jen smazat a pushout znovu
   pracuju s tim např. v upravit_main.qml
+
+Pepa nový: v main.qml řádek cca 160 je sdílení je to předchystaný stačí abys tam dodělal nějaký push toho co sdílíš 
