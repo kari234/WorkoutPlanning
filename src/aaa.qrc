@@ -8,11 +8,19 @@
         <file>icons/add_element.png</file>
         <file>icons/edit_href.png</file>
         <file>icons/share_href.png</file>
+        <file>icons/back.png</file>
+        <file>icons/blue_exit.png</file>
+        <file>icons/done_icon.png</file>
+        <file>icons/next.png</file>
+        <file>icons/pause.png</file>
+        <file>icons/play_button.png</file>
+        <file>icons/repeat.png</file>
     </qresource>
     <qresource prefix="/">
         <file>icons/play.png</file>
         <file>upravit_main.qml</file>
         <file>main.qml</file>
         <file>cviky_storage.js</file>
+        <file>cviceni.qml</file>
     </qresource>
 </RCC>
